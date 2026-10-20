@@ -105,15 +105,14 @@ function chartC(abs){
 /* ---------- E: příjmy a výdaje ---------- */
 function chartE(){
  $('sub').textContent='Příjmy a výdaje města · skutečná velikost v mld. Kč';
- $('hint').textContent='Jak číst: zelená čára jsou příjmy, červená výdaje. Šedá mezera mezi nimi je to, co město muselo pokrýt jinak, než z běžných příjmů (například úvěry nebo rezervy z minulých let). Najetím na rok se zobrazí přesné hodnoty.';
+ $('hint').textContent='Jak číst: zelená čára jsou příjmy, červená výdaje. Najetím na rok se zobrazí přesné hodnoty.';
  const Y=DATA.yrs.filter(y=>!isP(y)&&DATA.prij&&DATA.prij[y]!=null&&DATA.pmes&&DATA.pmes[y]===12);
  if(!Y.length){svg.setAttribute('viewBox','0 0 1000 120');svg.innerHTML='<text x="500" y="60" text-anchor="middle" font-size="16" fill="#777">Příjmy zatím nejsou v datech. Do složky data/ přidejte exporty „Souhrnný rozklikávací rozpočet“ (prosinec každého roku).</text>';return}
  const W=1000,H=420,L=56,R=170,T=24,B=40,pw=W-L-R,ph=H-T-B,n=Math.max(Y.length-1,1);
  const ex=Y.map(y=>DATA.sk[y].reduce((a,b)=>a+b,0)/1e6),inc=Y.map(y=>DATA.prij[y]/1e6);
- const mx=nice(Math.max(...ex,...inc)*1.08),st=mx/5,fm=v=>v.toFixed(1).replace('.',',')+' mld. Kč',X=j=>L+j*pw/n,YY=v=>T+ph-v/mx*ph;let s='';
- for(let k=0;k<=5;k++){const y=T+ph-k*ph/5;s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e3e3"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${(k*st).toLocaleString('cs-CZ',{maximumFractionDigits:1})} mld.</text>`}
+ const mx=Math.ceil(Math.max(...ex,...inc)*1.08/5)*5,st=5,nt=mx/st,fm=v=>v.toFixed(1).replace('.',',')+' mld. Kč',X=j=>L+j*pw/n,YY=v=>T+ph-v/mx*ph;let s='';
+ for(let k=0;k<=nt;k++){const y=T+ph-k*ph/nt;s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e3e3"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${(k*st).toLocaleString('cs-CZ',{maximumFractionDigits:1})} mld.</text>`}
  Y.forEach((y,j)=>s+=`<text x="${X(j)}" y="${H-14}" text-anchor="middle" font-size="12" fill="#444">${y}</text>`);
- s+=`<polygon points="${inc.map((v,j)=>X(j)+','+YY(v)).join(' ')} ${ex.map((v,j)=>[X(j),YY(v)]).reverse().map(p=>p.join(',')).join(' ')}" fill="#999" fill-opacity=".16"/>`;
  [[inc,'#5bbd84','Příjmy'],[ex,'#e0454f','Výdaje']].forEach(([a,c])=>{s+=`<polyline points="${a.map((v,j)=>X(j)+','+YY(v)).join(' ')}" fill="none" stroke="${c}" stroke-width="3.5" stroke-linejoin="round"/>`+a.map((v,j)=>`<circle cx="${X(j)}" cy="${YY(v)}" r="5" fill="${c}" stroke="#fff" stroke-width="2"/>`).join('')});
  const ends=[{y:YY(inc[inc.length-1]),t:'Příjmy '+fm(inc[inc.length-1]),c:'#5bbd84'},{y:YY(ex[ex.length-1]),t:'Výdaje '+fm(ex[ex.length-1]),c:'#e0454f'}].sort((a,b)=>a.y-b.y);
  if(ends[1].y-ends[0].y<16)ends[1].y=ends[0].y+16;
