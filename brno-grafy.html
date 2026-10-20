@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="utf-8"><title>Výdaje Brna – srovnání</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}html,body{margin:0}
+body{background:#fff;color:#1c1c1c;font:15px/1.35 "IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;padding:14px 12px calc(10px + env(safe-area-inset-bottom,0px))}
+h1{margin:6px 0 4px;font-weight:700;font-size:clamp(26px,5.4vw,40px);line-height:1.1;letter-spacing:.01em;text-transform:uppercase}
+.sub{margin:0 0 18px;text-transform:uppercase;font-size:14px;color:#4a4a4a}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
+.ctl select{flex:1;min-width:120px;font:inherit;font-size:16px;color:#666;text-align:center;text-align-last:center;padding:9px 8px;border:0;border-radius:3px;background:#e9e9e9;cursor:pointer}
+.ctl label{color:#666;font-size:14px}
+.chip{font:inherit;font-size:14px;padding:5px 10px;border:2px solid #ccc;border-radius:14px;background:#fff;color:#555;cursor:pointer}
+.chip:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #2f7f86;outline-offset:2px}
+.note{overflow-x:auto}svg{display:block;width:100%;height:auto;min-width:600px;font-family:inherit}
+#info{min-height:1.5em;margin:10px 0 4px;font-weight:600}
+#hint{margin:6px 0 2px;padding:8px 10px;background:#f4f4f4;border-left:3px solid #45989c;font-size:14px;color:#333}
+footer{margin-top:8px;color:#666;font-size:12.5px}
+.bar{transition:opacity .15s}.dim .bar:not(.on){opacity:.4}
+</style></head><body>
+<div id="hd"><h1>Statutární město Brno</h1><p class="sub" id="sub"></p></div>
+<div class="ctl" id="ctl"></div>
+<div class="note"><svg id="svg" role="img"></svg></div>
+<div id="info">&nbsp;</div><p id="hint"></p><footer id="foot"></footer>
+<script>
+const Q=new URLSearchParams(location.search);
+fetch('data.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(main).catch(()=>{const f=document.getElementById('foot');if(f)f.textContent='Data se nepodařilo načíst (data.json).'});
+function main(DATA){
+const O=DATA.ob;
+const MN=['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
+const isP=y=>DATA.mes[y]<12,done=DATA.yrs.filter(y=>!isP(y)),LY=done[done.length-1]||DATA.yrs[DATA.yrs.length-1],FY=DATA.yrs[0],PY=DATA.yrs.filter(isP)[0];
+const pnote=PY?` Rok ${PY} je neúplný (leden až ${MN[DATA.mes[PY]-1]}).`:'';
+
+const $=id=>document.getElementById(id),svg=$('svg'),ctl=$('ctl'),info=$('info');
+const CL=['#e0454f','#6ac6e6','#5bbd84','#e8891d','#a06ad6','#f2c14e','#d4637a','#3d9a9a'],GR='#b5b5b5',TXT='#1c1c1c';
+const G=Q.get('graf')||'zmena';
+if(Q.get('nadpis')==='0')$('hd').style.display='none';
+if(Q.get('ovladani')==='0')ctl.style.display='none';
+const k0=v=>(v>=10?String(Math.round(v)):v.toFixed(1).replace('.',','))+' Kč';
+const nice=m=>{const p=Math.pow(10,Math.floor(Math.log10(m))),r=m/p;return (r<=1?1:r<=2?2:r<=5?5:10)*p};
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function sel(id,opts,val,fn){const s=document.createElement('select');s.id=id;opts.forEach(([v,t])=>s.add(new Option(t,v)));s.value=val;s.onchange=()=>fn(s.value);ctl.appendChild(s);return s}
+function hover(root,cb){root.querySelectorAll('.bar').forEach(e=>{e.onmouseenter=()=>{svg.classList.add('dim');e.classList.add('on');info.textContent=cb(e)};e.onmouseleave=()=>{svg.classList.remove('dim');e.classList.remove('on');info.innerHTML='&nbsp;'}})}
+/* ---------- A: změna podílu mezi dvěma roky ---------- */
+function chartA(){
+ $('sub').textContent='Výdaje města · kdo získal a kdo ztratil z každé tisícovky';$('hint').textContent='Jak číst: pruh doprava znamená, že oblast dostává z každé tisícovky víc než na začátku, pruh doleva míň. Zkuste změnit roky nahoře a porovnat různá období.';
+ const ys=done;let f=Q.get('od')||String(FY),t=Q.get('do')||String(LY);
+ const opts=ys.map(y=>[y,y]);
+ sel('f',opts,f,v=>{f=v;draw()});const l=document.createElement('label');l.textContent='→';ctl.appendChild(l);sel('t',opts,t,v=>{t=v;draw()});
+ function draw(){
+  const rows=[];O.forEach((o,i)=>{const a=DATA.z[f][i],b=DATA.z[t][i];if(a===0&&b===0)return;const gray=i===19||(i===12&&((+f<=2014)!==(+t<=2014)));rows.push({i,a,b,d:b-a,gray})});
+  rows.sort((x,y)=>y.d-x.d);const W=1000,LW=270,RW=80,bw=W-LW-RW,z0=LW+bw/2,RH=30,H=rows.length*RH+36;
+  const mx=Math.max(10,...rows.map(r=>Math.abs(r.d)));let s='';
+  s+=`<text x="${z0-8}" y="14" text-anchor="end" font-size="13" fill="#777">← menší podíl</text><text x="${z0+8}" y="14" font-size="13" fill="#777">větší podíl →</text>`;
+  rows.forEach((r,k)=>{const y=30+k*RH,len=Math.abs(r.d)/mx*(bw/2-6),x=r.d>=0?z0:z0-len,col=r.gray?GR:(r.d>=0?'#5bbd84':'#e0454f');
+   const lab=(r.d>0.5?'+':r.d<-0.5?'−':'')+k0(Math.abs(r.d));
+   s+=`<g class="bar" data-i="${r.i}" data-t="${esc(O[r.i].n)}: ${r.a.toFixed(1).replace('.',',')} Kč → ${r.b.toFixed(1).replace('.',',')} Kč${r.gray?' (změna vykazování)':''}"><title>${esc(O[r.i].n)}</title><rect x="0" y="${y-3}" width="${W}" height="${RH-2}" fill="#fff" fill-opacity="0"/><text x="0" y="${y+14}" font-size="15" fill="${TXT}">${esc(O[r.i].s)}</text><rect x="${x}" y="${y}" width="${Math.max(len,1)}" height="20" fill="${col}"/><text x="${r.d>=0?z0+len+6:z0-len-6}" y="${y+15}" text-anchor="${r.d>=0?'start':'end'}" font-size="14" font-weight="600" fill="${TXT}">${lab}</text></g>`});
+  s+=`<line x1="${z0}" x2="${z0}" y1="22" y2="${H-8}" stroke="#888"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
+  $('foot').textContent=`Zdroj: Monitor Státní pokladny, skutečné výdaje podle odvětvového třídění. Změna je rozdíl v Kč z každých 1000 Kč výdajů mezi roky ${f} a ${t}. Šedé pruhy: změna vykazování, ne skutečná změna výdajů (dávky v sociálním zabezpečení do 2012, oddíl Ostatní činnosti mezi 2014 a 2015).`}
+ draw()}
+/* ---------- B: schválený rozpočet vs skutečnost ---------- */
+function chartB(){
+ $('sub').textContent='Plán a skutečnost · kolik se naplánovalo a kolik se utratilo';$('hint').textContent='Jak číst: modrý sloupec je to, co město naplánovalo, červený to, co skutečně utratilo. Procenta pod roky říkají, kolik z plánu se utratilo. Vyberte nahoře jednu oblast a uvidíte, ve kterých letech se plán nedařilo plnit.';
+ let o=Q.get('oblast')||'-1';const opts=[['-1','Celkem (všechny oblasti)'],...O.slice(0,19).map((x,i)=>[i,x.s])];
+ sel('o',opts,o,v=>{o=v;draw()});
+ function draw(){
+  const Y=DATA.yrs,val=(m,y)=>o==='-1'?m[y].reduce((a,b)=>a+b,0):m[y][+o],W=1000,H=430,L=64,R=10,T=34,B=78,pw=W-L-R,ph=H-T-B;
+  const a=Y.map(y=>val(DATA.sch,y)/1000),b=Y.map(y=>isP(y)?0:val(DATA.sk,y)/1000);
+  const mx=nice(Math.max(1,...a,...b)*1.05),big=mx>=2000,div=big?1000:1,unit=big?'mld. Kč':'mil. Kč',st=mx/5;
+  let s=`<rect x="${L}" y="10" width="12" height="12" fill="#6ac6e6"/><text x="${L+18}" y="21" font-size="14">Schválený rozpočet</text><rect x="${L+170}" y="10" width="12" height="12" fill="#e0454f"/><text x="${L+188}" y="21" font-size="14">Skutečnost</text><text x="${W-R}" y="21" text-anchor="end" font-size="13" fill="#777">${unit}</text>`;
+  for(let k=0;k<=5;k++){const y=T+ph-k*ph/5;s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e3e3"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${(k*st/div).toLocaleString('cs-CZ',{maximumFractionDigits:1})}</text>`}
+  const gw=pw/Y.length,bwid=gw*.36;
+  Y.forEach((y,i)=>{const x=L+i*gw,ha=a[i]/mx*ph,hb=b[i]/mx*ph,part=isP(y),pct=a[i]>0&&!part&&b[i]>0?Math.round(b[i]/a[i]*100)+' %':'–';
+   const tip=`${y}: schváleno ${(a[i]/div).toLocaleString('cs-CZ',{maximumFractionDigits:2})} ${unit}, ${part?'skutečnost jen za leden až srpen':'utraceno '+(b[i]/div).toLocaleString('cs-CZ',{maximumFractionDigits:2})+' '+unit+' ('+pct+')'}`;
+   s+=`<g class="bar" data-t="${tip}"><title>${y}</title><rect x="${x}" y="${T}" width="${gw}" height="${ph+B-20}" fill="#fff" fill-opacity="0"/><rect x="${x+gw*.1}" y="${T+ph-ha}" width="${bwid}" height="${ha}" fill="#6ac6e6"/>${part?'':`<rect x="${x+gw*.1+bwid+2}" y="${T+ph-hb}" width="${bwid}" height="${hb}" fill="#e0454f"/>`}<text x="${x+gw/2}" y="${T+ph+16}" text-anchor="middle" font-size="12" fill="#444">${y}</text><text x="${x+gw/2}" y="${T+ph+36}" text-anchor="middle" font-size="12" font-weight="600" fill="#444">${pct}</text></g>`});
+  s+=`<text x="${L-8}" y="${T+ph+36}" text-anchor="end" font-size="11" fill="#777">plnění</text><line x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}" stroke="#888"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
+  $('foot').textContent='Zdroj: Monitor Státní pokladny, odvětvový rozpočet. Plnění = skutečnost jako procento schváleného rozpočtu. '+pnote.replace('je neúplný','je neúplný (skutečnost jen za část roku)')}
+ draw()}
+/* ---------- C: vývoj vybraných oblastí ---------- */
+function chartC(abs){
+ $('sub').textContent=abs?`Výdaje v letech ${FY}–${LY} · skutečná velikost v mld. Kč`:`Vývoj v letech ${FY}–${LY} · na co jde z každé tisícovky`;
+ $('hint').textContent=abs?'Jak číst: čáry ukazují skutečnou velikost výdajů v miliardách korun (nominálně, bez očištění o inflaci). Oblasti přidáte nebo ubere kliknutím na štítky nahoře, najetím na čáru se zobrazí hodnoty za všechny roky.':'Jak číst: čáry ukazují, kolik korun z každé tisícovky výdajů šlo na vybranou oblast. Oblasti přidáte nebo ubere kliknutím na štítky nahoře, najetím na čáru se zobrazí hodnoty za všechny roky.';
+ const gv=(y,i)=>abs?DATA.sk[y][i]/1e6:DATA.z[y][i],fm=v=>abs?v.toFixed(2).replace('.',',')+' mld. Kč':k0(v);
+ const Y=done;let on=(Q.get('oblasti')||'0,2,5,6,7').split(',').map(Number).filter(i=>i>=0&&i<19).slice(0,8);
+ const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:6px';ctl.appendChild(row);
+ function chips(){row.innerHTML='';O.slice(0,19).forEach((o,i)=>{const k=on.indexOf(i),b=document.createElement('button');b.className='chip';b.textContent=o.s;if(k>=0){b.style.cssText=`border-color:${CL[k]};background:${CL[k]};color:${[1,2,3,5].includes(k)?TXT:'#fff'}`}b.setAttribute('aria-pressed',k>=0);b.onclick=()=>{if(k>=0)on.splice(k,1);else if(on.length<8)on.push(i);chips();draw()};row.appendChild(b)})}
+ function draw(){
+  const W=1000,H=420,L=56,R=150,T=20,B=40,pw=W-L-R,ph=H-T-B;
+  const mx=nice(Math.max(abs?0.1:10,...on.flatMap(i=>Y.map(y=>gv(y,i))))*1.08),st=mx/5;let s='';
+  for(let k=0;k<=5;k++){const y=T+ph-k*ph/5;s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e3e3"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${abs?(k*st).toLocaleString('cs-CZ',{maximumFractionDigits:1})+' mld.':Math.round(k*st)+' Kč'}</text>`}
+  Y.forEach((y,j)=>{const x=L+j*pw/(Y.length-1);s+=`<text x="${x}" y="${H-14}" text-anchor="middle" font-size="12" fill="#444">${y}</text>`});
+  const ends=[];
+  on.forEach((i,k)=>{const pts=Y.map((y,j)=>[L+j*pw/(Y.length-1),T+ph-gv(y,i)/mx*ph,gv(y,i),y]);
+   s+=`<g class="bar" data-t="${esc(O[i].n)}: ${pts.map(p=>p[3]+' '+k0(p[2])).join(' · ')}"><title>${esc(O[i].n)}</title><polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${CL[k]}" stroke-width="3.5" stroke-linejoin="round"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${CL[k]}" stroke="#fff" stroke-width="2"><title>${p[3]}: ${fm(p[2])}</title></circle>`).join('')}</g>`;
+   ends.push({y:pts[pts.length-1][1],t:fm(pts[pts.length-1][2])+' '+O[i].s,c:CL[k]})});
+  ends.sort((a,b)=>a.y-b.y);for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<15)ends[k].y=ends[k-1].y+15;
+  ends.forEach(e=>s+=`<text x="${W-R+10}" y="${e.y+4}" font-size="13" font-weight="600" fill="${TXT}"><tspan fill="${e.c}">●</tspan> ${esc(e.t.length>30?e.t.slice(0,29)+'…':e.t)}</text>`);
+  if(!on.length)s+=`<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="16" fill="#777">Vyberte oblasti nahoře</text>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
+  $('foot').textContent='Zdroj: Monitor Státní pokladny, skutečné výdaje podle odvětvového třídění, '+(abs?'nominální částky v mld. Kč, bez očištění o inflaci.':'Kč z každých 1000 Kč výdajů.')+' Zvolit lze nejvýše 8 oblastí. '+(PY?` Neúplný rok ${PY} v grafu není.`:'')+' Oddíl Ostatní činnosti mění vykazování mezi 2014 a 2015.'}
+ chips();draw()}
+/* ---------- E: příjmy a výdaje ---------- */
+function chartE(){
+ $('sub').textContent='Příjmy a výdaje města · skutečná velikost v mld. Kč';
+ $('hint').textContent='Jak číst: zelená čára jsou příjmy, červená výdaje. Šedá mezera mezi nimi je to, co město muselo pokrýt jinak, než z běžných příjmů (například úvěry nebo rezervy z minulých let). Najetím na rok se zobrazí přesné hodnoty.';
+ const Y=DATA.yrs.filter(y=>!isP(y)&&DATA.prij&&DATA.prij[y]!=null&&DATA.pmes&&DATA.pmes[y]===12);
+ if(!Y.length){svg.setAttribute('viewBox','0 0 1000 120');svg.innerHTML='<text x="500" y="60" text-anchor="middle" font-size="16" fill="#777">Příjmy zatím nejsou v datech. Do složky data/ přidejte exporty „Souhrnný rozklikávací rozpočet“ (prosinec každého roku).</text>';return}
+ const W=1000,H=420,L=56,R=170,T=24,B=40,pw=W-L-R,ph=H-T-B,n=Math.max(Y.length-1,1);
+ const ex=Y.map(y=>DATA.sk[y].reduce((a,b)=>a+b,0)/1e6),inc=Y.map(y=>DATA.prij[y]/1e6);
+ const mx=nice(Math.max(...ex,...inc)*1.08),st=mx/5,fm=v=>v.toFixed(1).replace('.',',')+' mld. Kč',X=j=>L+j*pw/n,YY=v=>T+ph-v/mx*ph;let s='';
+ for(let k=0;k<=5;k++){const y=T+ph-k*ph/5;s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e3e3"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${(k*st).toLocaleString('cs-CZ',{maximumFractionDigits:1})} mld.</text>`}
+ Y.forEach((y,j)=>s+=`<text x="${X(j)}" y="${H-14}" text-anchor="middle" font-size="12" fill="#444">${y}</text>`);
+ s+=`<polygon points="${inc.map((v,j)=>X(j)+','+YY(v)).join(' ')} ${ex.map((v,j)=>[X(j),YY(v)]).reverse().map(p=>p.join(',')).join(' ')}" fill="#999" fill-opacity=".16"/>`;
+ [[inc,'#5bbd84','Příjmy'],[ex,'#e0454f','Výdaje']].forEach(([a,c])=>{s+=`<polyline points="${a.map((v,j)=>X(j)+','+YY(v)).join(' ')}" fill="none" stroke="${c}" stroke-width="3.5" stroke-linejoin="round"/>`+a.map((v,j)=>`<circle cx="${X(j)}" cy="${YY(v)}" r="5" fill="${c}" stroke="#fff" stroke-width="2"/>`).join('')});
+ const ends=[{y:YY(inc[inc.length-1]),t:'Příjmy '+fm(inc[inc.length-1]),c:'#5bbd84'},{y:YY(ex[ex.length-1]),t:'Výdaje '+fm(ex[ex.length-1]),c:'#e0454f'}].sort((a,b)=>a.y-b.y);
+ if(ends[1].y-ends[0].y<16)ends[1].y=ends[0].y+16;
+ ends.forEach(e=>s+=`<text x="${W-R+10}" y="${e.y+4}" font-size="13" font-weight="600" fill="${TXT}"><tspan fill="${e.c}">●</tspan> ${e.t}</text>`);
+ Y.forEach((y,j)=>{const d=ex[j]-inc[j];s+=`<g class="bar" data-t="${y}: příjmy ${fm(inc[j])}, výdaje ${fm(ex[j])}, ${d>=0?'rozdíl (výdaje nad příjmy)':'přebytek (příjmy nad výdaji)'} ${fm(Math.abs(d))}"><rect x="${X(j)-pw/n/2}" y="${T}" width="${pw/n}" height="${ph}" fill="#fff" fill-opacity="0"/></g>`});
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
+ $('foot').textContent='Zdroj: Monitor Státní pokladny, skutečné příjmy (třídy 1 až 4) a skutečné výdaje (třídy 5 a 6) Statutárního města Brna, nominální částky bez očištění o inflaci. Rozdíl mezi výdaji a příjmy se kryje financováním (třída 8).'}
+({zmena:chartA,plan:chartB,vyvoj:chartC,vydaje:()=>chartC(true),prijmy:chartE}[G]||chartA)();
+if(window.self!==window.top){const a=document.createElement('a');a.href=location.origin+location.pathname+location.search;a.target='_blank';a.rel='noopener';a.textContent='Otevřít interaktivně v novém okně ↗';a.style.cssText='display:inline-block;margin-top:6px;color:#2f7f86;font-size:13px';document.body.appendChild(a)}
+}
+</script></body></html>

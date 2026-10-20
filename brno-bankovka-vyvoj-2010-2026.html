@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="utf-8"><title>Skutečné výdaje Brna na tisícikoruně</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--fg:#1c1c1c;--mut:#4a4a4a;--line:#e3e3e3;--ctl:#e9e9e9;--ctlfg:#666}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:#fff;color:var(--fg);font:15px/1.35 "IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;padding:14px 12px calc(10px + env(safe-area-inset-bottom,0px))}
+h1{margin:6px 0 4px;font-weight:700;font-size:clamp(26px,5.4vw,40px);line-height:1.1;letter-spacing:.01em;text-transform:uppercase}
+.sub{margin:0 0 20px;text-transform:uppercase;font-size:14px;color:var(--mut)}
+.ctl{display:flex;gap:6px;align-items:stretch;margin-bottom:12px}
+.ctl select{flex:1;font:inherit;font-size:16px;color:var(--ctlfg);text-align:center;text-align-last:center;padding:9px 8px;border:0;border-radius:3px;background:var(--ctl);cursor:pointer}
+button{font:inherit;color:var(--ctlfg);min-width:40px;padding:0 12px;border:0;border-radius:3px;background:var(--ctl);cursor:pointer;font-size:18px}
+button:hover,.ctl select:hover{background:#ddd}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #2f7f86;outline-offset:2px}
+button[aria-pressed=true]{background:#45989c;color:#fff}
+.note{overflow-x:auto}svg{display:block;width:100%;height:auto;min-width:560px}
+.dim .strip:not(.on){opacity:.4}.strip{cursor:default;transition:opacity .15s}
+#info{min-height:1.5em;margin:10px 0 4px;font-weight:600}
+ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0 22px}
+li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;padding:5px 2px;border-bottom:1px solid var(--line)}
+li i{width:12px;height:12px;border-radius:2px;align-self:center}li.on{background:#f4f4f4}li b{font-weight:600;font-variant-numeric:tabular-nums}
+#hint{margin:6px 0 10px;padding:8px 10px;background:#f4f4f4;border-left:3px solid #45989c;font-size:14px;color:#333}
+footer{margin-top:10px;color:#666;font-size:12.5px}
+</style></head><body>
+<div id="hd"><h1>Statutární město Brno</h1><p class="sub">Rozpočet v letech 2010–2026 · Kam peníze jdou</p></div>
+<div class="ctl" id="ctl"><button id="prev" aria-label="Předchozí rok">‹</button><select id="sel" aria-label="Rok"></select><button id="next" aria-label="Další rok">›</button><button id="play" aria-label="Přehrát roky" aria-pressed="false">▶</button></div>
+<div class="note"><svg id="svg" viewBox="0 0 1000 440" role="img" aria-label="Skutečné výdaje Brna na tisícikoruně"></svg></div>
+<div id="info">&nbsp;</div><p id="hint">Jak číst: šířka pruhu je podíl oblasti na každých 1000 Kč výdajů. Spusťte přehrávání (▶) a sledujte, jak se pruhy mění: doprava a sport rostou, finanční operace se zmenšují. Skokové změny kolem let 2012 a 2015 způsobila změna vykazování, ne skutečná změna výdajů.</p><ul id="list"></ul>
+<footer id="foot"></footer>
+<script>
+fetch('data.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw 0;return r.json()}).then(main).catch(()=>{const f=document.getElementById('foot');if(f)f.textContent='Data se nepodařilo načíst (data.json).'});
+function main(DATA){
+DATA.roky=DATA.z;DATA.oblasti=DATA.ob;
+const Q=new URLSearchParams(location.search),YRS=Object.keys(DATA.roky),O=DATA.oblasti;
+const sel=document.getElementById('sel'),svg=document.getElementById('svg'),list=document.getElementById('list'),info=document.getElementById('info');
+const MN=['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
+const isP=y=>DATA.mes[y]<12,done=DATA.yrs.filter(y=>!isP(y)),LY=done[done.length-1]||DATA.yrs[DATA.yrs.length-1],FY=DATA.yrs[0],PY=DATA.yrs.filter(isP)[0];
+const pnote=PY?` Rok ${PY} je neúplný (leden až ${MN[DATA.mes[PY]-1]}).`:'';
+document.querySelector('.sub').textContent=`Rozpočet v letech ${FY}–${LY+(PY?1:0)} · Kam peníze jdou`;
+YRS.forEach(y=>sel.add(new Option(+y&&isP(y)?`${y} (leden až ${MN[DATA.mes[y]-1]})`:y,y)));
+if(Q.get('ovladani')==='0')document.getElementById('ctl').style.display='none';
+if(Q.get('nadpis')==='0')document.getElementById('hd').style.display='none';
+let cur=YRS.includes(Q.get('rok'))?Q.get('rok'):String(LY),timer=null;
+/* barvy a barva písma shodné s grafy v Infogramu (treemapa a stacked) */
+const C={red:['#e0454f','#fff'],green:['#5bbd84','#1c1c1c'],orange:['#e8891d','#1c1c1c'],blue:['#6ac6e6','#1c1c1c'],rose:['#d4637a','#fff'],purple:['#a06ad6','#fff'],gold:['#f2c14e','#1c1c1c'],teal:['#3d9a9a','#fff']};
+const PAL=['red','green','orange','blue','red','green','rose','purple','orange','gold','blue','purple','rose','red','rose','blue','green','orange','teal','gold','teal'].map(k=>C[k]);
+const fmt=v=>(v>=10?String(Math.round(v)):v.toFixed(1).replace('.',','))+' Kč';
+function wrap(t,n){const w=t.split(' '),L=[];let c='';w.forEach(x=>{if((c+' '+x).trim().length>n&&c){L.push(c);c=x}else c=(c+' '+x).trim()});if(c)L.push(c);return L}
+function bg(){let s='<rect width="1000" height="440" fill="#e9efe7"/>';
+ for(let k=0;k<22;k++){let p='';for(let x=0;x<=1000;x+=8)p+=(x?'L':'M')+x+' '+(20+k*19+9*Math.sin(x*.03+k*.5)).toFixed(1);s+=`<path d="${p}" fill="none" stroke="#5f8a74" stroke-opacity=".28" stroke-width=".9"/>`}
+ for(let R=24;R<=210;R+=9){let p='';for(let a=0;a<=6.30;a+=.04)p+=(a?'L':'M')+(640+(R+7*Math.sin(9*a+R*.2))*Math.cos(a)).toFixed(1)+' '+(220+(R+7*Math.sin(9*a+R*.2))*Math.sin(a)).toFixed(1);s+=`<path d="${p}" fill="none" stroke="#3f6f5a" stroke-opacity=".3" stroke-width=".9"/>`}
+ s+='<text x="26" y="230" font-family="Georgia,serif" font-weight="900" font-size="190" fill="none" stroke="#3f6f5a" stroke-opacity=".45" stroke-width="2">1000</text><text x="974" y="426" text-anchor="end" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#2c5a47" fill-opacity=".7">VZOR · NENÍ PLATIDLEM</text>';return s}
+function draw(){
+ sel.value=cur;const V=DATA.roky[cur],W=1000,H=440;let x=0,s=bg();const tot=V.reduce((a,b)=>a+b,0);
+ O.forEach((o,i)=>{const v=V[i];if(!(v>0))return;const w=v/tot*W,[fill,tc]=PAL[i%PAL.length],cx=x+w/2;
+  s+=`<g class="strip" data-i="${i}"><title>${o.n}: ${v.toFixed(1).replace('.',',')} Kč z každých 1000 Kč</title><rect x="${x}" y="0" width="${w}" height="${H}" fill="${fill}" fill-opacity=".82" stroke="#fff" stroke-width="1.5"/>`;
+  if(w>=120){const L=wrap(o.s,Math.max(8,Math.floor((w-14)/7.4)));L.forEach((l,k)=>s+=`<text x="${x+7}" y="${24+k*19}" font-size="16" fill="${tc}">${l}</text>`);s+=`<text x="${x+7}" y="${24+L.length*19}" font-size="16" font-weight="600" fill="${tc}">${fmt(v)}</text>`}
+  else if(w>=26){const t=fmt(v)+' · '+(o.s.length>40?o.s.slice(0,38)+'…':o.s);s+=`<text transform="translate(${cx+5} ${H-12}) rotate(-90)" font-size="${w>44?15:13}" fill="${tc}"><tspan font-weight="600">${fmt(v)}</tspan> · ${o.s.length>40?o.s.slice(0,38)+'…':o.s}</text>`}
+  s+='</g>';x+=w});
+ svg.innerHTML=s;svg.style.fontFamily='"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif';
+ list.innerHTML=O.map((o,i)=>V[i]>0?`<li data-i="${i}"><i style="background:${PAL[i%PAL.length][0]}"></i><span>${o.s}</span><b>${fmt(V[i])}</b></li>`:'').join('');
+ const on=i=>{svg.classList.toggle('dim',i!=null);svg.querySelectorAll('.strip').forEach(e=>e.classList.toggle('on',e.dataset.i==i));list.querySelectorAll('li').forEach(e=>e.classList.toggle('on',e.dataset.i==i));info.innerHTML=i==null?'&nbsp;':`${O[i].n}: ${V[i].toFixed(1).replace('.',',')} Kč z každých 1000 Kč`};
+ [...svg.querySelectorAll('.strip'),...list.querySelectorAll('li')].forEach(e=>{e.onmouseenter=()=>on(+e.dataset.i);e.onmouseleave=()=>on(null);e.onclick=()=>on(+e.dataset.i)});
+ document.getElementById('foot').innerHTML='Zdroj: Monitor Státní pokladny, skutečné výdaje Statutárního města Brna podle odvětvového třídění. Šířka pruhu odpovídá podílu oblasti na každých 1000 Kč výdajů. Vizualizace není platidlem.'+(isP(cur)?pnote+' Podíly nejsou srovnatelné s celými roky.':'')+(+cur<=2012?' Do roku 2012 zahrnuje i dávky v sociálním zabezpečení, které se pak přestaly vykazovat.':'');
+}
+function go(d){const i=YRS.indexOf(cur)+d;if(i>=0&&i<YRS.length){cur=YRS[i];draw()}}
+function stop(){clearInterval(timer);timer=null;const p=document.getElementById('play');p.setAttribute('aria-pressed','false');p.textContent='▶'}
+document.getElementById('prev').onclick=()=>{stop();go(-1)};document.getElementById('next').onclick=()=>{stop();go(1)};
+sel.onchange=()=>{stop();cur=sel.value;draw()};
+document.getElementById('play').onclick=function(){if(timer)return stop();this.setAttribute('aria-pressed','true');this.textContent='❚❚';if(cur===YRS[YRS.length-1])cur=YRS[0];draw();timer=setInterval(()=>{if(YRS.indexOf(cur)>=YRS.length-1)return stop();go(1)},1300)};
+draw();
+function startAuto(){const p=document.getElementById('play');p.setAttribute('aria-pressed','true');p.textContent='❚❚';timer=setInterval(()=>{cur=YRS[(YRS.indexOf(cur)+1)%YRS.length];draw()},1600)}
+if(Q.get('auto')==='1'&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))startAuto();
+if(window.self!==window.top){const a=document.createElement('a');a.href=location.origin+location.pathname;a.target='_blank';a.rel='noopener';a.textContent='Otevřít interaktivně v novém okně ↗';a.style.cssText='display:inline-block;margin-top:6px;color:#2f7f86;font-size:13px';document.body.appendChild(a)}
+}
+</script></body></html>
