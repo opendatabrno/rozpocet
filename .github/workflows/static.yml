@@ -30,6 +30,7 @@ jobs:
 
       - name: Spuštění Python skriptu (Příprava dat)
         run: |
+          pip install pandas
           python ./scripts/build_data.py
 
       - name: Nastavení GitHub Pages
