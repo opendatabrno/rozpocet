@@ -122,7 +122,24 @@ function chartE(){
  Y.forEach((y,j)=>{const d=ex[j]-inc[j];s+=`<g class="bar" data-t="${y}: příjmy ${fm(inc[j])}, výdaje ${fm(ex[j])}, ${d>=0?'rozdíl (výdaje nad příjmy)':'přebytek (příjmy nad výdaji)'} ${fm(Math.abs(d))}"><rect x="${X(j)-pw/n/2}" y="${T}" width="${pw/n}" height="${ph}" fill="#fff" fill-opacity="0"/></g>`});
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
  $('foot').textContent='Zdroj: Monitor Státní pokladny, skutečné příjmy (třídy 1 až 4) a skutečné výdaje (třídy 5 a 6) Statutárního města Brna, nominální částky bez očištění o inflaci. Rozdíl mezi výdaji a příjmy se kryje financováním (třída 8).'}
-({zmena:chartA,plan:chartB,vyvoj:chartC,vydaje:()=>chartC(true),prijmy:chartE}[G]||chartA)();
+/* ---------- F: cashflow (saldo příjmů a výdajů) ---------- */
+function chartF(){
+ $('sub').textContent='Cashflow města · roční saldo příjmů a výdajů v mld. Kč';
+ $('hint').textContent='Jak číst: zelený sloupec znamená, že město za rok vybralo víc, než utratilo (přebytek), červený, že utratilo víc, než vybralo (schodek). Najetím na rok se zobrazí příjmy, výdaje a součet salda od prvního roku.';
+ const Y=DATA.yrs.filter(y=>!isP(y)&&DATA.prij&&DATA.prij[y]!=null&&DATA.pmes&&DATA.pmes[y]===12);
+ if(!Y.length){svg.setAttribute('viewBox','0 0 1000 120');svg.innerHTML='<text x="500" y="60" text-anchor="middle" font-size="16" fill="#777">Příjmy zatím nejsou v datech. Do složky data/ přidejte exporty „Souhrnný rozklikávací rozpočet“ (prosinec každého roku).</text>';return}
+ const W=1000,H=420,L=56,R=20,T=24,B=40,pw=W-L-R,ph=H-T-B,n=Y.length,bw=pw/n;
+ const ex=Y.map(y=>DATA.sk[y].reduce((a,b)=>a+b,0)/1e6),inc=Y.map(y=>DATA.prij[y]/1e6),d=Y.map((y,j)=>inc[j]-ex[j]);
+ let c=0;const cum=d.map(v=>c+=v);
+ const st=nice(Math.max(...d.map(Math.abs),.1)*2/5),lo=Math.min(0,Math.floor(Math.min(...d)*1.1/st))*st,hi=Math.max(0,Math.ceil(Math.max(...d)*1.1/st))*st;
+ const YY=v=>T+(hi-v)/(hi-lo)*ph,fm=v=>v.toFixed(1).replace('.',',')+' mld. Kč',sg=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1).replace('.',',');let s='';
+ for(let v=lo;v<=hi+1e-9;v+=st){const y=YY(v);s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${Math.abs(v)<1e-9?'#888':'#e3e3e3'}"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="#777">${sg(v)} mld.</text>`}
+ Y.forEach((y,j)=>{const x=L+j*bw,v=d[j],y0=YY(0),y1=YY(v),col=v>=0?'#5bbd84':'#e0454f';
+  s+=`<g class="bar" data-t="${y}: příjmy ${fm(inc[j])}, výdaje ${fm(ex[j])}, ${v>=0?'přebytek':'schodek'} ${fm(Math.abs(v))} · součet salda od ${Y[0]}: ${sg(cum[j])} mld. Kč"><rect x="${x}" y="${T}" width="${bw}" height="${ph}" fill="#fff" fill-opacity="0"/><rect x="${x+bw*.18}" y="${Math.min(y0,y1)}" width="${bw*.64}" height="${Math.max(Math.abs(y1-y0),1)}" fill="${col}"/><text x="${x+bw/2}" y="${v>=0?y1-6:y1+15}" text-anchor="middle" font-size="12" font-weight="600" fill="${TXT}">${sg(v)}</text></g>`;
+  s+=`<text x="${x+bw/2}" y="${H-14}" text-anchor="middle" font-size="12" fill="#444">${y}</text>`});
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=s;hover(svg,e=>e.dataset.t);
+ $('foot').textContent=`Zdroj: Monitor Státní pokladny, skutečné příjmy (třídy 1 až 4) minus skutečné výdaje (třídy 5 a 6) Statutárního města Brna, nominální částky bez očištění o inflaci. Saldo nezahrnuje financování (třída 8), tedy úvěry, jejich splátky a změny stavu na účtech. Součet salda za roky ${Y[0]}–${Y[n-1]}: ${sg(cum[n-1])} mld. Kč.`+(PY?` Neúplný rok ${PY} v grafu není.`:'')}
+({zmena:chartA,plan:chartB,vyvoj:chartC,vydaje:()=>chartC(true),prijmy:chartE,cashflow:chartF}[G]||chartA)();
 if(window.self!==window.top){const a=document.createElement('a');a.href=location.origin+location.pathname+location.search;a.target='_blank';a.rel='noopener';a.textContent='Otevřít interaktivně v novém okně ↗';a.style.cssText='display:inline-block;margin-top:6px;color:#2f7f86;font-size:13px';document.body.appendChild(a)}
 }
 </script></body></html>

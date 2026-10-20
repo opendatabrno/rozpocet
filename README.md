@@ -26,6 +26,7 @@ Adresa `brno-grafy.html` s parametrem `graf`:
 - `?graf=vyvoj` vývoj podílu oblastí na tisícikoruně (volitelně `&oblasti=0,2,5`)
 - `?graf=vydaje` skutečná velikost výdajů podle oblastí v mld. Kč
 - `?graf=prijmy` příjmy a výdaje města v mld. Kč
+- `?graf=cashflow` roční saldo (příjmy minus výdaje) v mld. Kč
 Pro všechny: `&nadpis=0` skryje nadpis, `&ovladani=0` skryje ovládací prvky. Bankovka: `brno-bankovka-vyvoj-2010-2026.html` (`?rok=2016`, `&auto=1`).
 
 ## Místní náhled
