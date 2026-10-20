@@ -47,7 +47,6 @@ let cur=YRS.includes(Q.get('rok'))?Q.get('rok'):String(LY),timer=null;
 const C={red:['#e0454f','#fff'],green:['#5bbd84','#1c1c1c'],orange:['#e8891d','#1c1c1c'],blue:['#6ac6e6','#1c1c1c'],rose:['#d4637a','#fff'],purple:['#a06ad6','#fff'],gold:['#f2c14e','#1c1c1c'],teal:['#3d9a9a','#fff']};
 const PAL=['red','green','orange','blue','red','green','rose','purple','orange','gold','blue','purple','rose','red','rose','blue','green','orange','teal','gold','teal'].map(k=>C[k]);
 const fmt=v=>(v>=10?String(Math.round(v)):v.toFixed(1).replace('.',','))+' Kč';
-function wrap(t,n){const w=t.split(' '),L=[];let c='';w.forEach(x=>{if((c+' '+x).trim().length>n&&c){L.push(c);c=x}else c=(c+' '+x).trim()});if(c)L.push(c);return L}
 function bg(){let s='<rect width="1000" height="440" fill="#e9efe7"/>';
  for(let k=0;k<22;k++){let p='';for(let x=0;x<=1000;x+=8)p+=(x?'L':'M')+x+' '+(20+k*19+9*Math.sin(x*.03+k*.5)).toFixed(1);s+=`<path d="${p}" fill="none" stroke="#5f8a74" stroke-opacity=".28" stroke-width=".9"/>`}
  for(let R=24;R<=210;R+=9){let p='';for(let a=0;a<=6.30;a+=.04)p+=(a?'L':'M')+(640+(R+7*Math.sin(9*a+R*.2))*Math.cos(a)).toFixed(1)+' '+(220+(R+7*Math.sin(9*a+R*.2))*Math.sin(a)).toFixed(1);s+=`<path d="${p}" fill="none" stroke="#3f6f5a" stroke-opacity=".3" stroke-width=".9"/>`}
@@ -56,8 +55,7 @@ function draw(){
  sel.value=cur;const V=DATA.roky[cur],W=1000,H=440;let x=0,s=bg();const tot=V.reduce((a,b)=>a+b,0);
  O.forEach((o,i)=>{const v=V[i];if(!(v>0))return;const w=v/tot*W,[fill,tc]=PAL[i%PAL.length],cx=x+w/2;
   s+=`<g class="strip" data-i="${i}"><title>${o.n}: ${v.toFixed(1).replace('.',',')} Kč z každých 1000 Kč</title><rect x="${x}" y="0" width="${w}" height="${H}" fill="${fill}" fill-opacity=".82" stroke="#fff" stroke-width="1.5"/>`;
-  if(w>=120){const L=wrap(o.s,Math.max(8,Math.floor((w-14)/7.4)));L.forEach((l,k)=>s+=`<text x="${x+7}" y="${24+k*19}" font-size="16" fill="${tc}">${l}</text>`);s+=`<text x="${x+7}" y="${24+L.length*19}" font-size="16" font-weight="600" fill="${tc}">${fmt(v)}</text>`}
-  else if(w>=26){const t=fmt(v)+' · '+(o.s.length>40?o.s.slice(0,38)+'…':o.s);s+=`<text transform="translate(${cx+5} ${H-12}) rotate(-90)" font-size="${w>44?15:13}" fill="${tc}"><tspan font-weight="600">${fmt(v)}</tspan> · ${o.s.length>40?o.s.slice(0,38)+'…':o.s}</text>`}
+  if(w>=26){s+=`<text transform="translate(${cx+5} ${H-12}) rotate(-90)" font-size="${w>44?15:13}" fill="${tc}"><tspan font-weight="600">${fmt(v)}</tspan> · ${o.s.length>40?o.s.slice(0,38)+'…':o.s}</text>`}
   s+='</g>';x+=w});
  svg.innerHTML=s;svg.style.fontFamily='"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif';
  list.innerHTML=O.map((o,i)=>V[i]>0?`<li data-i="${i}"><i style="background:${PAL[i%PAL.length][0]}"></i><span>${o.s}</span><b>${fmt(V[i])}</b></li>`:'').join('');
