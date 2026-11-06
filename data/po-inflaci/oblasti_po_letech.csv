@@ -1,0 +1,133 @@
+oblast,rok,nominalne_mld,realne_mld_ceny_2025,podil_pct
+Doprava,2015,3.081,4.781,27.9
+Doprava,2016,2.784,4.29,24.49
+Doprava,2017,3.004,4.517,23.55
+Doprava,2018,3.648,5.373,24.17
+Doprava,2019,3.917,5.611,25.57
+Doprava,2020,4.66,6.469,26.65
+Doprava,2021,4.742,6.342,28.87
+Doprava,2022,4.886,5.677,26.57
+Doprava,2023,5.379,5.646,27.2
+Doprava,2024,5.689,5.831,26.77
+Doprava,2025,5.91,5.91,25.63
+Státní správa a samospráva,2015,1.553,2.41,14.06
+Státní správa a samospráva,2016,1.635,2.52,14.38
+Státní správa a samospráva,2017,1.755,2.639,13.76
+Státní správa a samospráva,2018,1.961,2.887,12.99
+Státní správa a samospráva,2019,2.031,2.909,13.26
+Státní správa a samospráva,2020,2.268,3.148,12.97
+Státní správa a samospráva,2021,2.097,2.805,12.77
+Státní správa a samospráva,2022,2.371,2.755,12.89
+Státní správa a samospráva,2023,2.581,2.71,13.05
+Státní správa a samospráva,2024,3.028,3.103,14.25
+Státní správa a samospráva,2025,2.969,2.969,12.88
+"Kultura, církve, média",2015,0.995,1.544,9.01
+"Kultura, církve, média",2016,1.094,1.686,9.63
+"Kultura, církve, média",2017,1.366,2.053,10.71
+"Kultura, církve, média",2018,2.252,3.317,14.92
+"Kultura, církve, média",2019,1.654,2.37,10.8
+"Kultura, církve, média",2020,1.574,2.185,9.0
+"Kultura, církve, média",2021,1.639,2.192,9.98
+"Kultura, církve, média",2022,1.749,2.032,9.51
+"Kultura, církve, média",2023,1.882,1.975,9.52
+"Kultura, církve, média",2024,2.007,2.057,9.44
+"Kultura, církve, média",2025,2.142,2.142,9.29
+Bydlení a komunální služby,2015,1.172,1.819,10.62
+Bydlení a komunální služby,2016,1.388,2.14,12.21
+Bydlení a komunální služby,2017,1.824,2.743,14.3
+Bydlení a komunální služby,2018,1.562,2.3,10.35
+Bydlení a komunální služby,2019,1.907,2.732,12.45
+Bydlení a komunální služby,2020,1.753,2.433,10.02
+Bydlení a komunální služby,2021,1.457,1.948,8.87
+Bydlení a komunální služby,2022,1.793,2.084,9.75
+Bydlení a komunální služby,2023,1.617,1.698,8.18
+Bydlení a komunální služby,2024,1.723,1.766,8.11
+Bydlení a komunální služby,2025,2.193,2.193,9.51
+Školství,2015,0.824,1.28,7.47
+Školství,2016,0.766,1.18,6.74
+Školství,2017,0.992,1.491,7.78
+Školství,2018,1.101,1.622,7.3
+Školství,2019,1.19,1.705,7.77
+Školství,2020,1.222,1.697,6.99
+Školství,2021,1.039,1.39,6.33
+Školství,2022,1.094,1.271,5.95
+Školství,2023,1.416,1.486,7.16
+Školství,2024,1.367,1.401,6.43
+Školství,2025,1.526,1.526,6.62
+Sport a zájmová činnost,2015,0.54,0.838,4.89
+Sport a zájmová činnost,2016,0.421,0.65,3.71
+Sport a zájmová činnost,2017,0.491,0.738,3.85
+Sport a zájmová činnost,2018,0.692,1.02,4.59
+Sport a zájmová činnost,2019,0.599,0.858,3.91
+Sport a zájmová činnost,2020,0.631,0.876,3.61
+Sport a zájmová činnost,2021,0.735,0.983,4.47
+Sport a zájmová činnost,2022,1.019,1.184,5.54
+Sport a zájmová činnost,2023,1.804,1.894,9.12
+Sport a zájmová činnost,2024,1.706,1.748,8.03
+Sport a zájmová činnost,2025,2.332,2.332,10.11
+Sociální služby,2015,0.721,1.118,6.53
+Sociální služby,2016,0.717,1.105,6.31
+Sociální služby,2017,0.815,1.226,6.39
+Sociální služby,2018,0.962,1.416,6.37
+Sociální služby,2019,1.125,1.612,7.35
+Sociální služby,2020,1.54,2.138,8.81
+Sociální služby,2021,1.45,1.939,8.83
+Sociální služby,2022,1.332,1.548,7.24
+Sociální služby,2023,1.336,1.403,6.76
+Sociální služby,2024,1.339,1.372,6.3
+Sociální služby,2025,1.639,1.639,7.11
+Ochrana životního prostředí,2015,0.675,1.048,6.12
+Ochrana životního prostředí,2016,0.652,1.004,5.73
+Ochrana životního prostředí,2017,0.672,1.01,5.27
+Ochrana životního prostředí,2018,0.747,1.1,4.95
+Ochrana životního prostředí,2019,0.77,1.104,5.03
+Ochrana životního prostředí,2020,0.821,1.14,4.7
+Ochrana životního prostředí,2021,0.801,1.071,4.88
+Ochrana životního prostředí,2022,1.322,1.536,7.19
+Ochrana životního prostředí,2023,1.162,1.219,5.87
+Ochrana životního prostředí,2024,1.677,1.719,7.89
+Ochrana životního prostředí,2025,1.643,1.643,7.12
+Vodní hospodářství,2015,0.382,0.592,3.46
+Vodní hospodářství,2016,0.516,0.795,4.54
+Vodní hospodářství,2017,0.59,0.887,4.62
+Vodní hospodářství,2018,0.769,1.133,5.1
+Vodní hospodářství,2019,0.698,1.0,4.56
+Vodní hospodářství,2020,0.946,1.313,5.41
+Vodní hospodářství,2021,0.909,1.216,5.54
+Vodní hospodářství,2022,0.969,1.125,5.27
+Vodní hospodářství,2023,0.888,0.932,4.49
+Vodní hospodářství,2024,0.958,0.982,4.51
+Vodní hospodářství,2025,1.014,1.014,4.4
+Bezpečnost a pořádek,2015,0.371,0.575,3.36
+Bezpečnost a pořádek,2016,0.398,0.613,3.5
+Bezpečnost a pořádek,2017,0.433,0.651,3.4
+Bezpečnost a pořádek,2018,0.471,0.694,3.12
+Bezpečnost a pořádek,2019,0.49,0.702,3.2
+Bezpečnost a pořádek,2020,0.506,0.702,2.89
+Bezpečnost a pořádek,2021,0.458,0.613,2.79
+Bezpečnost a pořádek,2022,0.502,0.583,2.73
+Bezpečnost a pořádek,2023,0.524,0.55,2.65
+Bezpečnost a pořádek,2024,0.577,0.592,2.72
+Bezpečnost a pořádek,2025,0.624,0.624,2.7
+Finanční operace,2015,0.289,0.449,2.62
+Finanční operace,2016,0.521,0.803,4.59
+Finanční operace,2017,0.309,0.465,2.43
+Finanční operace,2018,0.27,0.398,1.79
+Finanční operace,2019,0.264,0.379,1.73
+Finanční operace,2020,0.238,0.33,1.36
+Finanční operace,2021,0.215,0.287,1.31
+Finanční operace,2022,0.268,0.312,1.46
+Finanční operace,2023,0.294,0.309,1.49
+Finanční operace,2024,0.4,0.41,1.88
+Finanční operace,2025,0.366,0.366,1.59
+Zdravotnictví,2015,0.275,0.426,2.49
+Zdravotnictví,2016,0.27,0.416,2.37
+Zdravotnictví,2017,0.219,0.33,1.72
+Zdravotnictví,2018,0.393,0.579,2.6
+Zdravotnictví,2019,0.351,0.503,2.29
+Zdravotnictví,2020,0.474,0.657,2.71
+Zdravotnictví,2021,0.547,0.732,3.33
+Zdravotnictví,2022,0.419,0.487,2.28
+Zdravotnictví,2023,0.591,0.621,2.99
+Zdravotnictví,2024,0.422,0.433,1.99
+Zdravotnictví,2025,0.337,0.337,1.46
